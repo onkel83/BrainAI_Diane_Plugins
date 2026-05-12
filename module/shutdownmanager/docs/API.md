@@ -1,0 +1,85 @@
+# API-Dokumentation: ShutdownManagerPlugin v2.0.0
+
+Das **ShutdownManagerPlugin** (ID: `SHUTDOWN-MOD`) orchestriert das deterministische Herunterfahren der Diane-Architektur. Es fungiert als zentrale Sicherheitsinstanz, die den Übergang vom flüchtigen Laufzeitzustand in die persistente Speicherung (Industrial Sovereignty) verwaltet. Das Modul unterscheidet strikt zwischen administrativen Abbruchbefehlen und Nutzer-Interaktionen während der Validierungsphase.
+
+## Metadaten
+
+* **Plugin-ID:** `SHUTDOWN-MOD`
+* **Version:** `2.0.0`
+* **Namespace:** `Diane.Plugins`
+* **Abhängigkeiten:** `Diane.Core`
+
+## Öffentliche Schnittstellen (IBioPlugin)
+
+### `OnLoad()`
+
+Initialisiert den Manager und etabliert die Exit-Ebene. 
+
+* **Aktionen:** * Abonniert den globalen `BioBus`. 
+* Registriert administrative Befehle und Bestätigungs-Aliase. 
+* Sendet eine Statusmeldung an den System-Audit. 
+
+### `OnUnload()`
+
+Führt den deterministischen Teardown durch. 
+
+* **Aktionen:** Meldet den Event-Listener ab, um Speicherlecks und Ghost-Prozesse während der physischen Terminierung auszuschließen (Zero Footprint). 
+
+---
+
+## Interne Logik & Gating
+
+### `ProcessShutdownLogic()`
+
+Evaluiert die zentrale Abschalt-Policy aus der `BioConfig`. 
+
+* **Kausalität:** Löst den Parameter `SHUTDOWN_POLICY` auf:
+* `SAVE`: Erzwingt die asynchrone Persistenzierung ohne Rückfrage. 
+* `NOSAVE`: Initiert den sofortigen System-Exit ohne Datensicherung. 
+* `PROMPT` (Default): Übergibt die Entscheidungsebene an die HMI-Interaktion. 
+
+### `ExecuteShutdown(bool shouldSave)`
+
+Der asynchrone Motor des Herunterfahr-Prozesses. 
+
+* **Sicherheits-Watchdog:** Implementiert einen parallelen **5-Sekunden-Timeout** via `Task.Delay`. Sollte das Speicher-Subsystem (`SWARM`) innerhalb dieses Fensters keine Erfolgsmeldung liefern, greift der Fail-Safe und erzwingt den Exit, um einen „Hanging State“ zu vermeiden. 
+
+
+
+### `HandleTraffic(BioPacket pkt)`
+
+Der zustandsabhängige Nachrichten-Router. 
+
+* **Zustandswächter:** Überwacht im aktiven Speichermodus (`_isPerformingSave`) gezielt die `SUCCESS`-Rückmeldungen der Persistenz-Layer. 
+* **Validierung:** Wertet während einer ausstehenden Bestätigung jede nicht-valide Eingabe als sofortigen Abbruch des Shutdown-Prozesses. 
+
+
+
+### `FinalHardExit()`
+
+Der definitive „Point of No Return“. 
+
+* **Grace Period:** Implementiert eine bewusste Verzögerung von **250ms**, um die vollständige Auslieferung des finalen `USER_EXIT`-Pakets auf dem Bus sicherzustellen, bevor der OS-Prozess hart terminiert wird. 
+
+
+
+---
+
+## Registrierte Befehle
+
+Das Plugin registriert eine Kombination aus privilegierten Steuerbefehlen und freien Interaktions-Aliasen. 
+
+| Befehl | Header | Admin? | Beschreibung |
+| --- | --- | --- | --- |
+| **QUIT** / **EXIT** | `SYS_QUIT_REQ` | **Ja** | Leitet das reguläre Herunterfahren gemäß Policy ein. |
+| **QQUIT** | `SYS_QUIT_FORCE_PROMPT` | **Ja** | Erzwingt die Speicher-Abfrage (Policy-Override). |
+| **JA** / **Y** / **YES** | `SYS_QUIT_CONFIRM_YES` | Nein | Bestätigt die Speicherung des neuronalen Zustands. |
+| **NEIN** / **N** / **NO** | `SYS_QUIT_CONFIRM_NO` | Nein | Lehnt die Speicherung ab und beendet sofort. |
+
+---
+
+## Architektur-Konfiguration
+
+Das Verhalten des Moduls wird über globale Konfigurationsschlüssel gesteuert:
+
+* `SHUTDOWN_POLICY`: Erlaubte Werte: `SAVE`, `NOSAVE`, `PROMPT`. 

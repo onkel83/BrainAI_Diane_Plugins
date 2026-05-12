@@ -16,15 +16,12 @@ namespace Diane.Plugins
         public string Version => "2.0.0";
 
         private const string LOG_COMP = "KNOWLEDGE";
-
         private string LibraryDir => BioConfig.Instance.Get("KNOWLEDGE_DIR", "library\\knowledge");
         private string FileExt => BioConfig.Instance.Get("KNOWLEDGE_FILE_EXT", ".txt");
         private string CommentPrefix => BioConfig.Instance.Get("KNOWLEDGE_COMMENT_PREFIX", "//");
-
         private string MsgEmpty => BioConfig.Instance.Get("KNOWLEDGE_MSG_EMPTY", "MEINE BIBLIOTHEK IST LEER.");
         private string MsgReading => BioConfig.Instance.Get("KNOWLEDGE_MSG_READING", "ICH LESE DAS BUCH: {0}");
         private string MsgNotFound => BioConfig.Instance.Get("KNOWLEDGE_MSG_NOT_FOUND", "DAS BUCH '{0}' EXISTIERT NICHT.");
-
         private string FullPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, LibraryDir);
 
         /// <summary>

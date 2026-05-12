@@ -20,14 +20,11 @@ namespace Diane.Plugins
 
         private readonly ConcurrentDictionary<ulong, string> _vocabCache = new ConcurrentDictionary<ulong, string>();
         private float _currentEnergy = 100f;
-
         private string _lastSubjectContext = "";
         private DateTime _lastSubjectTime = DateTime.MinValue;
-
         private float EnergyThreshold => float.Parse(BioConfig.Instance.Get("LANG_ENERGY_THRESHOLD", "5.0"), CultureInfo.InvariantCulture);
         private string[] StopWords => BioConfig.Instance.Get("LANG_STOPWORDS", "DER,DIE,DAS,EIN,EINE,EINEN").Split(',');
         private string[] QuestionWords => BioConfig.Instance.Get("LANG_QUESTION_WORDS", "WER,WAS,WO,WIE,WANN").Split(',');
-
         private string[] Pronouns => BioConfig.Instance.Get("LANG_PRONOUNS", "ER,SIE,ES,IHN,IHM,IHR,DIESE,DIESER,DIESES").Split(',');
 
         /// <summary>

@@ -27,14 +27,13 @@ namespace Diane.Plugins
         private ulong _idSelfEnergy;
         private ulong _idSelfStress;
         private System.Timers.Timer? _ticker;
-        
+        private DateTime _lastTickTime;
+        private DateTime _lastInteractionTime;
+
         public float Energy = 100f;
         public float Stress = 0f;
         public float Curiosity = 0f;
         public bool IsSleeping = false;
-
-        private DateTime _lastTickTime;
-        private DateTime _lastInteractionTime;
 
         /// <summary>
         /// Initialisiert den autonomen Stoffwechsel und etabliert den biologischen Rhythmus der Architektur.

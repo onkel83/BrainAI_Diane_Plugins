@@ -16,15 +16,13 @@ namespace Diane.Plugins
     {
         public string PluginID => "LOGGER";
         public string Version => "2.0.0";
+        public BioLogLevel MinLevel { get; set; } = BioLogLevel.Info;
 
         private string _logPath = "";
         private readonly BlockingCollection<string> _fileQueue = new BlockingCollection<string>();
         private CancellationTokenSource _cts = new CancellationTokenSource();
-
         private bool _isAdmin = false;
-
-        public BioLogLevel MinLevel { get; set; } = BioLogLevel.Info;
-
+        
         /// <summary>
         /// Initialisiert das LoggerPlugin und etabliert die physische Dateisystem-Schnittstelle.
         /// Löst die Konfiguration (Pfad und initiales Loglevel) deterministisch auf, bindet den Listener an den BioBus 

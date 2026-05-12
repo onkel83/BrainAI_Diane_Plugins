@@ -16,7 +16,6 @@ namespace Diane.Plugins
 
         private const string LOG_COMP = "CMD-MOD";
         private bool _isAdminLocally = false;
-
         private readonly Dictionary<string, BioCommand> _commands = new Dictionary<string, BioCommand>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
